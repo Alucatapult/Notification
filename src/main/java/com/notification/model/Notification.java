@@ -1,53 +1,53 @@
 package com.notification.model;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
+@Data
 @Entity
 @Table(name = "notifications")
+@NoArgsConstructor
 public class Notification {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
+    private String type;
+
+    @Column(nullable = false)
     private String recipient;
 
     @Column(nullable = false)
-    private String type;  // INFO, ALERT, WARNING, etc.
-
-    @Column(nullable = false, length = 1000)
     private String payload;
 
     @Column(nullable = false)
-    private String status;  // PENDING, DELIVERED, FAILED
+    private String status;
 
-    @Column(name = "created_at")
+    @Column
+    private String targetUrl;
+
+    @Column
+    private Integer retryCount = 0;
+
+    @Column
     private LocalDateTime createdAt;
 
-    @Column(name = "delivered_at")
-    private LocalDateTime deliveredAt;
-    
-    @Column(name = "retry_count")
-    private Integer retryCount;
+    @Column
+    private LocalDateTime processedAt;
 
-    // Default constructor for JPA
-    public Notification() {
-        this.createdAt = LocalDateTime.now();
-        this.status = "PENDING";
-        this.retryCount = 0;
+    @Column
+    private String errorMessage;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        status = "PENDING";
     }
 
-    // Constructor with essential fields
-    public Notification(String recipient, String type, String payload) {
-        this();
-        this.recipient = recipient;
-        this.type = type;
-        this.payload = payload;
-    }
-
-    // Getters and Setters
+    // Explicit getters and setters
     public Long getId() {
         return id;
     }
@@ -56,20 +56,20 @@ public class Notification {
         this.id = id;
     }
 
-    public String getRecipient() {
-        return recipient;
-    }
-
-    public void setRecipient(String recipient) {
-        this.recipient = recipient;
-    }
-
     public String getType() {
         return type;
     }
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getRecipient() {
+        return recipient;
+    }
+
+    public void setRecipient(String recipient) {
+        this.recipient = recipient;
     }
 
     public String getPayload() {
@@ -88,6 +88,22 @@ public class Notification {
         this.status = status;
     }
 
+    public String getTargetUrl() {
+        return targetUrl;
+    }
+
+    public void setTargetUrl(String targetUrl) {
+        this.targetUrl = targetUrl;
+    }
+
+    public Integer getRetryCount() {
+        return retryCount;
+    }
+
+    public void setRetryCount(Integer retryCount) {
+        this.retryCount = retryCount;
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -96,34 +112,19 @@ public class Notification {
         this.createdAt = createdAt;
     }
 
-    public LocalDateTime getDeliveredAt() {
-        return deliveredAt;
+    public LocalDateTime getProcessedAt() {
+        return processedAt;
     }
 
-    public void setDeliveredAt(LocalDateTime deliveredAt) {
-        this.deliveredAt = deliveredAt;
-    }
-    
-    public Integer getRetryCount() {
-        return retryCount;
-    }
-    
-    public void setRetryCount(Integer retryCount) {
-        this.retryCount = retryCount;
-    }
-    
-    public void incrementRetryCount() {
-        this.retryCount++;
+    public void setProcessedAt(LocalDateTime processedAt) {
+        this.processedAt = processedAt;
     }
 
-    @Override
-    public String toString() {
-        return "Notification{" +
-                "id=" + id +
-                ", recipient='" + recipient + '\'' +
-                ", type='" + type + '\'' +
-                ", status='" + status + '\'' +
-                ", createdAt=" + createdAt +
-                '}';
+    public String getErrorMessage() {
+        return errorMessage;
     }
-}
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
+} 

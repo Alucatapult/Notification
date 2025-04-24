@@ -1,0 +1,84 @@
+spring:
+  application:
+    name: notification-service
+
+  # Database Configuration
+  datasource:
+    url: jdbc:postgresql://postgres:5432/notification_db
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+  # JPA Configuration
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  # Redis Configuration
+  redis:
+    host: redis
+    port: 6379
+
+  # RabbitMQ Configuration
+  rabbitmq:
+    host: rabbitmq
+    port: 5672
+    username: guest
+    password: guest
+
+# Server Configuration
+server:
+  port: 8080
+
+# JWT Configuration
+jwt:
+  expiration: 86400000  # 24 hours in milliseconds
+
+# WebSocket Configuration
+websocket:
+  allowed-origins: "*"
+  endpoint: /ws
+  user-registry-endpoint: /user
+  application-prefix: /app
+  broker-prefix: /queue
+
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+
+# Resilience4j Configuration
+resilience4j:
+  circuitbreaker:
+    instances:
+      notificationService:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        permittedNumberOfCallsInHalfOpenState: 3
+        waitDurationInOpenState: 5s
+        failureRateThreshold: 50
+
+  retry:
+    instances:
+      notificationService:
+        maxAttempts: 3
+        waitDuration: 1s
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
+
+# Logging Configuration
+logging:
+  level:
+    com.notification: DEBUG
+    org.springframework.web: INFO
+    org.hibernate: INFO 
