@@ -1,0 +1,51 @@
+version: '3.8'
+services:
+  # Notification Service
+  notification-service:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/notification
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=password
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.PostgreSQLDialect
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - JWT_SECRET=dockerSecretKey
+      - SPRING_MAIN_ALLOW_CIRCULAR_REFERENCES=true
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    networks:
+      - notification-network
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=notification
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - notification-network
+
+  # Web Client (Optional)
+  web-client:
+    image: nginx:alpine
+    ports:
+      - "8082:80"
+    volumes:
+      - ./web-client:/usr/share/nginx/html
+    networks:
+      - notification-network
+
+networks:
+  notification-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
